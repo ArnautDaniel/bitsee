@@ -32,6 +32,6 @@
 
 ;;;Calulate n_x for p = GCF(#ofcameras) and n_x = which number screen
 ;;;res = total width of screen
-(define (find-n res n p) (* res (/(remainder (- n 1) p) p)))
+(define (find-n res n p) (* res (/ (remainder (- n 1) p) p)))
 
 ;;;Add formula for width
