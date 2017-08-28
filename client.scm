@@ -35,3 +35,23 @@
 (define (find-n res n p) (* res (/ (remainder (- n 1) p) p)))
 
 ;;;Add formula for width
+
+(define (find-n-map finder res n p)
+  (map (lambda (x)
+         (finder res x p))
+       n))
+
+(define (find-y-map finder res n p r)
+  (map (lambda (x)
+         (finder res x p r))
+       n))
+
+;;;Find y coordinate.  higher p = more rows
+;;; higher r = more columns
+
+(define (find-y res n p r) (* res (/ (floor (/ (- n 1) p)) r)))
+
+;;;To find a 2 * 3 column p > r
+;;;To find a 3 * 2 column r > p
+;;;To find a n+1 * n column p > r
+;;;To find a n * n+1 column r > p
