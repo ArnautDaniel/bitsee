@@ -13,7 +13,13 @@
 (define (grab-camera-ips)
   (define-values (i o) (tcp-connect *current-host* *current-port-no*))
   (define (recur-ip)
-    (if (eof-object? (peek-char i))
+    (if
+      (process (string-append "ffmpeg -i rtsp://admin:123456@"
+                              ip
+                              "/profile1 -rtsp_transport tcp -r 10 -vcodec copy -y -segment_time "
+                              *segment-duration*
+                              " -f segment -an camera-1 -%03d.mkv"))))))
+ (eof-object? (peek-char i))
         '()
         (cons (read-line i) (recur-ip)))))
 
@@ -23,3 +29,9 @@
   (map start-video *camera-list*))
 
 ;;;TODO Topology with omx options
+
+;;;Calulate n_x for p = GCF(#ofcameras) and n_x = which number screen
+;;;res = total width of screen
+(define (find-n res n p) (* res (/(remainder (- n 1) p) p)))
+
+;;;Add formula for width
