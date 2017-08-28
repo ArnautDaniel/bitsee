@@ -18,7 +18,7 @@
 
 (define (start-server)
   ((make-tcp-server
-    (tcp-listen 6509)
+    (tcp-listen 6508)
     (lambda () (map (lambda (x)
                       (write-line x))
                     *camera-ips*)))
@@ -32,9 +32,9 @@
     (lambda ()
       (process (string-append "ffmpeg -i rtsp://admin:123456@"
                               ip
-                              "/profile1 -rtsp_transport tcp -r 10 -vcodec copy -y -segment_time"
+                              "/profile1 -rtsp_transport tcp -r 10 -vcodec copy -y -segment_time "
                               *segment-duration*
-                              "-f segment -an camera-1-%03d.mkv"))))))
+                              " -f segment -an camera-1 -%03d.mkv"))))))
 
 ;;;Perhaps a symbol list for disabling/enabling ffmpeg options?
 ;;;Or a text file?
@@ -47,4 +47,9 @@
 
 (record-all)
 
+
+;;;Need to setup an alist with Camera(n):ip-addr
+;;;Then use camera number to mkdir's
+;;;Place a file with the ip for that camera in directory
+;;;Log an alert if the ip changes
 
