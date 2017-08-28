@@ -16,7 +16,9 @@
     (if
       (process (string-append "ffmpeg -i rtsp://admin:123456@"
                               ip
-                              "/profile1 -rtsp_transport tcp -r 10 -vcodec copy -y -segment_time "
+                              "/profile1 -rtsp_transp
+;;;To find a 2 * 3 column p > r
+;;;To find a 3 * 2 column r > port tcp -r 10 -vcodec copy -y -segment_time "
                               *segment-duration*
                               " -f segment -an camera-1 -%03d.mkv"))))))
  (eof-object? (peek-char i))
@@ -32,24 +34,17 @@
 
 ;;;Calulate n_x for p = GCF(#ofcameras) and n_x = which number screen
 ;;;res = total width of screen
-(define (find-n res n p) (* res (/ (remainder (- n 1) p) p)))
-
-;;;Add formula for width
-
-(define (find-n-map finder res n p)
-  (map (lambda (x)
-         (finder res x p))
-       n))
-
-(define (find-y-map finder res n p r)
-  (map (lambda (x)
-         (finder res x p r))
-       n))
+(define (find-x res n p) (* res (/ (remainder (- n 1) p) p)))
 
 ;;;Find y coordinate.  higher p = more rows
 ;;; higher r = more columns
-
 (define (find-y res n p r) (* res (/ (floor (/ (- n 1) p)) r)))
+
+(define (find-grid res-h res-w n p r)
+  (map
+   (lambda (x)
+     (list (find-x res-w x p) (find-y res-h x p r)))
+   n))
 
 ;;;To find a 2 * 3 column p > r
 ;;;To find a 3 * 2 column r > p
