@@ -1,5 +1,5 @@
-(declare (uses tcp posix))
 
+(use tcp posix)
 ;;;Work out topology
 (define (start-video x)
   (process (string-append "omxplayer --win \"0 0 640 480\" -o local rtsp://admin:123456@"
@@ -19,17 +19,35 @@
 
 (define *camera-list* (grab-camera-ips))
 
-(define (start-cameras)
-  (define )
-  (map start-video *camera-list*))
-;;;Steps to starting camera
-;;;Calculate grid based on (length *camera-list*)
+
+;;;
+(define (check-length lst)
+  (let ((len (length lst)))
+    (if (prime? len)
+        (+ len 1)
+        len)))
+
+(define (generate-fact-pair n)
+  (let ((fact (factors n 2)))
+    (if (= (length fact) 1)
+        (list (first fact) 1)
+        (list (list-ref fact (- (length fact) 2))
+              (list-ref fact (- (length fact) 3))))))
+
+(define (start-cameras cam-lst)
+  (let* ((len (check-length cam-lst))
+        (fact-pair (generate-fact-pair len))
+        (camera-grid (find-grid 1080 1920 (iota len 1)
+                                (first fact-pair)
+                                (second fact-pair))))
+    camera-grid))
+
+;;;Calculate grid based on (length *camera-list*) [DONE]
 ;;;Calculate total window size (e.g. 640x480)
 ;;;Call start-video with all 3 values
-;;;Map this process somehow
-;;;Figure out data structs
+;;;Map this process
 
-;;;TODO Topology with omx options
+;;;TODO Topology with omx options [IN PROGRESS]
 
 ;;;Calulate n_x for p = GCF(#ofcameras) and n_x = which number screen
 ;;;res = total width of screen
@@ -39,6 +57,7 @@
 ;;; higher r = more columns
 (define (find-y res n p r) (* res (/ (floor (/ (- n 1) p)) r)))
 
+;;;ex (find-grid 1080 1920 #cameras #highestfactorwithinR #R)
 (define (find-grid res-h res-w n p r)
   (map
    (lambda (x)
@@ -49,3 +68,28 @@
 ;;;To find a 3 * 2 column r > p
 ;;;To find a n+1 * n column p > r
 ;;;To find a n * n+1 column r > p
+
+(define (factors n f)
+  (let loop ((f f) (acc '()))
+    (cond ((> f n) (reverse acc))
+          ((zero? (remainder n f))
+           (loop (add1 f) (cons f acc)))
+          (else (loop (add1 f) acc)))))
+
+
+;;;Sicp lol
+(define (square x) (* x x))
+
+(define (smallest-divisor n)
+  (find-divisor n 2))
+
+(define (find-divisor n test-divisor)
+  (cond ((> (square test-divisor) n) n)
+        (( divides? test-divisor n) test-divisor)
+        (else (find-divisor n (+ test-divisor 1)))))
+
+(define (divides? a b)
+  (= (remainder b a) 0))
+
+(define (prime? n)
+  (= n (smallest-divisor n)))
