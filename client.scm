@@ -11,24 +11,23 @@
 (define *current-port-no* 6508)
 
 (define (grab-camera-ips)
-  (define-values (i o) (tcp-connect *current-host* *current-port-no*))
-  (define (recur-ip)
-    (if
-      (process (string-append "ffmpeg -i rtsp://admin:123456@"
-                              ip
-                              "/profile1 -rtsp_transp
-;;;To find a 2 * 3 column p > r
-;;;To find a 3 * 2 column r > port tcp -r 10 -vcodec copy -y -segment_time "
-                              *segment-duration*
-                              " -f segment -an camera-1 -%03d.mkv"))))))
- (eof-object? (peek-char i))
-        '()
-        (cons (read-line i) (recur-ip)))))
+     (define-values (i o) (tcp-connect *current-host* *current-port-no*))
+     (define (recur-ip)
+            (if (eof-object? (peek-char i))
+                         '()
+                         (cons (read-line i) (recur-ip)))))
 
 (define *camera-list* (grab-camera-ips))
 
 (define (start-cameras)
+  (define )
   (map start-video *camera-list*))
+;;;Steps to starting camera
+;;;Calculate grid based on (length *camera-list*)
+;;;Calculate total window size (e.g. 640x480)
+;;;Call start-video with all 3 values
+;;;Map this process somehow
+;;;Figure out data structs
 
 ;;;TODO Topology with omx options
 
