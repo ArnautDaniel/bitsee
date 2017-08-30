@@ -1,13 +1,17 @@
 
-(use tcp posix)
+(use tcp posix numbers srfi-1)
 ;;;Work out topology
 (define (start-video x)
   (process (string-append "omxplayer --win \"0 0 640 480\" -o local rtsp://admin:123456@"
                           x
                           "/profile1")))
 
+(define (start-mpv ip x y gx gy)
+  (process (string-append "mpv --no-border --no-keepaspect --geometry=" x "x" y "-" gx "-" gy
+                          " rtsp://admin:123456@" ip "/profile1")))
+
 (define *current-camera-count*)
-(define *current-host* "10.0.0.40")
+(define *current-host* "127.0.0.1")
 (define *current-port-no* 6508)
 
 (define (grab-camera-ips)
@@ -18,7 +22,6 @@
                          (cons (read-line i) (recur-ip)))))
 
 (define *camera-list* (grab-camera-ips))
-
 
 ;;;
 (define (check-length lst)
@@ -34,13 +37,22 @@
         (list (list-ref fact (- (length fact) 2))
               (list-ref fact (- (length fact) 3))))))
 
+;;;Test of a 3x2 grid [works]
+;;;Need to solve the p and r problem so this
+;;;can do this automatically
 (define (start-cameras cam-lst)
-  (let* ((len (check-length cam-lst))
-        (fact-pair (generate-fact-pair len))
+  (let* ((len (length cam-lst))
+        (fact-pair '(3 2))
         (camera-grid (find-grid 1080 1920 (iota len 1)
                                 (first fact-pair)
-                                (second fact-pair))))
-    camera-grid))
+                                (second fact-pair)))
+        (resH "640")
+        (resW "540")
+        (zipped (zip cam-lst camera-grid)))
+    (map (lambda (x)
+           (start-mpv (first x) resH resW (number->string (first (second x))) (number->string (second (second x)))))
+         zipped)))
+
 
 ;;;Calculate grid based on (length *camera-list*) [DONE]
 ;;;Calculate total window size (e.g. 640x480)

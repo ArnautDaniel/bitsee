@@ -14,7 +14,7 @@
       '()
       (cons (read-line ipp) (generate-ip-lst ipp))))
 
-(define *camera-ips* (generate-ip-port "10.0.0.0/24"))
+(define *camera-ips* (generate-ip-port "192.168.22.0/24"))
 
 (define (start-server)
   ((make-tcp-server
@@ -45,7 +45,7 @@
 (define (record-all)
   (map record-stream *camera-ips*))
 
-(record-all)
+
 
 
 ;;;Need to setup an alist with Camera(n):ip-addr
