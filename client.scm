@@ -8,7 +8,7 @@
                           "/profile1")))
 
 (define (start-mpv ip x y gx gy)
-  (process (string-append "mpv --screen=1 --no-border --no-keepaspect --geometry=" x "x" y "-" gx "-" gy
+  (process (string-append "mpv --screen=0 --no-border --no-keepaspect --geometry=" x "x" y "-" gx "-" gy
                           " rtsp://admin:123456@" ip "/profile1")))
 
 (define *current-camera-count*)
@@ -23,8 +23,18 @@
                          (cons (read-line i) (recur-ip))))
      (recur-ip))
 
-(define *camera-list* (grab-camera-ips))
-
+;(define *camera-list* (grab-camera-ips))
+(define *fake-camera-list* '("192.168.22.22" "192.168.22.22" "192.168.22.22"
+                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
+                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
+                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
+                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
+                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
+                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
+                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
+                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
+                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
+                             "192.168.22.22" "192.168.22.22"))
 ;;;
 (define (check-length lst)
   (let ((len (length lst)))
@@ -44,11 +54,12 @@
 ;;;can do this automatically
 (define (start-cameras cam-lst)
   (let* ((len (length cam-lst))
-        (fact-pair '(3 2))
         (camera-grid (find-grid 1080 1920 (iota len 1)))
+        (resH "480")
+        (resW "135")
         (zipped (zip cam-lst camera-grid)))
     (map (lambda (x)
-           (start-mpv (first x) resH resW (number->string (first (second x))) (number->string (second (second x)))))
+           (start-mpv (first x) resH resW (number->string (inexact->exact (first (second x)))) (number->string (inexact->exact (second (second x))))))
          zipped)))
 
 
@@ -85,7 +96,7 @@
   (let ((c-sqrt (floor (sqrt c))))
     (let g ((cur-n c-sqrt))
       (cond ((zero? (modulo c cur-n))
-             cur-n)
+             (inexact->exact cur-n))
             (else
              (g (- cur-n 1)))))))
 
