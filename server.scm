@@ -1,4 +1,4 @@
-(require-extension tcp-server posix)
+(require-extension tcp-server posix srfi-18 tcp)
 (declare (uses tcp posix srfi-18))
 
 
@@ -6,7 +6,7 @@
 (define (generate-ip-port str)
   (define-values (ip ip2 ip3)
     (process
-     (string-append "~/bitsee/find-network.sh " str)))
+     (string-append "./find-network.sh " str)))
   (generate-ip-lst ip))
 
 (define (generate-ip-lst ipp)
@@ -24,7 +24,7 @@
                     *camera-ips*)))
    #t))
 
-(thread-start! (make-thread (lambda () (start-server))))
+ (thread-start! (make-thread (lambda() (start-server))))
 
 (define (record-stream ip)
   (thread-start!
@@ -46,7 +46,7 @@
   (map record-stream *camera-ips*))
 
 
-
+(write-line "hello")
 
 ;;;Need to setup an alist with Camera(n):ip-addr
 ;;;Then use camera number to mkdir's

@@ -1,5 +1,6 @@
 
 (use tcp posix numbers srfi-1)
+
 ;;;Work out topology
 (define (start-video x)
   (process (string-append "omxplayer --win \"0 0 640 480\" -o local rtsp://admin:123456@"
@@ -7,11 +8,11 @@
                           "/profile1")))
 
 (define (start-mpv ip x y gx gy)
-  (process (string-append "mpv --no-border --no-keepaspect --geometry=" x "x" y "-" gx "-" gy
+  (process (string-append "mpv --screen=1 --no-border --no-keepaspect --geometry=" x "x" y "-" gx "-" gy
                           " rtsp://admin:123456@" ip "/profile1")))
 
 (define *current-camera-count*)
-(define *current-host* "127.0.0.1")
+(define *current-host* "192.168.1.78")
 (define *current-port-no* 6508)
 
 (define (grab-camera-ips)
@@ -19,7 +20,8 @@
      (define (recur-ip)
             (if (eof-object? (peek-char i))
                          '()
-                         (cons (read-line i) (recur-ip)))))
+                         (cons (read-line i) (recur-ip))))
+     (recur-ip))
 
 (define *camera-list* (grab-camera-ips))
 
@@ -43,11 +45,7 @@
 (define (start-cameras cam-lst)
   (let* ((len (length cam-lst))
         (fact-pair '(3 2))
-        (camera-grid (find-grid 1080 1920 (iota len 1)
-                                (first fact-pair)
-                                (second fact-pair)))
-        (resH "640")
-        (resW "540")
+        (camera-grid (find-grid 1080 1920 (iota len 1)))
         (zipped (zip cam-lst camera-grid)))
     (map (lambda (x)
            (start-mpv (first x) resH resW (number->string (first (second x))) (number->string (second (second x)))))
@@ -55,9 +53,9 @@
 
 
 ;;;Calculate grid based on (length *camera-list*) [DONE]
-;;;Calculate total window size (e.g. 640x480)
-;;;Call start-video with all 3 values
-;;;Map this process
+;;;Calculate total window size (e.g. 640x480) [LAST TODO]
+;;;Call start-video with all 3 values [DONE]
+;;;Map this process [DONE]
 
 ;;;TODO Topology with omx options [IN PROGRESS]
 
@@ -70,11 +68,29 @@
 (define (find-y res n p r) (* res (/ (floor (/ (- n 1) p)) r)))
 
 ;;;ex (find-grid 1080 1920 #cameras #highestfactorwithinR #R)
-(define (find-grid res-h res-w n p r)
+(define (find-grid res-h res-w n)
+  (let* ((len (no-primes (length n)))
+         (p (find-p len))
+         (r (find-r len)))
   (map
    (lambda (x)
      (list (find-x res-w x p) (find-y res-h x p r)))
-   n))
+   n)))
+
+(define (no-primes n)
+  (if (prime? n)
+      (+ n 1)
+      n))
+(define (find-p c)
+  (let ((c-sqrt (floor (sqrt c))))
+    (let g ((cur-n c-sqrt))
+      (cond ((zero? (modulo c cur-n))
+             cur-n)
+            (else
+             (g (- cur-n 1)))))))
+
+(define (find-r c)
+  (/ c (find-p c)))
 
 ;;;To find a 2 * 3 column p > r
 ;;;To find a 3 * 2 column r > p
