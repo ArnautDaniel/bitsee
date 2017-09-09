@@ -1,5 +1,7 @@
 
 (use tcp posix numbers srfi-1)
+(define *height* 2160)
+(define *width* 3840)
 
 ;;;Work out topology
 (define (start-video x)
@@ -24,17 +26,26 @@
      (recur-ip))
 
 ;(define *camera-list* (grab-camera-ips))
-(define *fake-camera-list* '("192.168.22.22" "192.168.22.22" "192.168.22.22"
-                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
-                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
-                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
-                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
-                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
-                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
-                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
-                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
-                             "192.168.22.22" "192.168.22.22" "192.168.22.22"
-                             "192.168.22.22" "192.168.22.22"))
+(define *fake-camera-list* '("10.0.0.5" "10.0.0.5" "10.0.0.5"
+                             "10.0.0.5" "10.0.0.5" "10.0.0.5"))
+
+(define *medium-fake* '("10.0.0.5" "10.0.0.5" "10.0.0.5"
+                        "10.0.0.5" "10.0.0.5" "10.0.0.5"
+                        "10.0.0.5" "10.0.0.5" "10.0.0.5"
+                        "10.0.0.5" "10.0.0.5" "10.0.0.5"))
+
+(define *small-fake* '("10.0.0.5" "10.0.0.5" "10.0.0.5"
+                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
+                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
+                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
+                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
+                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
+                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
+                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
+                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
+                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
+                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
+                       "10.0.0.5" "10.0.0.5" "10.0.0.5"))
 ;;;
 (define (check-length lst)
   (let ((len (length lst)))
@@ -54,12 +65,19 @@
 ;;;can do this automatically
 (define (start-cameras cam-lst)
   (let* ((len (length cam-lst))
-        (camera-grid (find-grid 1080 1920 (iota len 1)))
-        (resH "480")
-        (resW "135")
+        (camera-grid (find-grid *height* *width* (iota len 1)))
+        (resW
+         (inexact->exact (find-res-h *height* len)))
+        (resH
+         (inexact->exact (find-res-w *width* len)))
         (zipped (zip cam-lst camera-grid)))
+
     (map (lambda (x)
-           (start-mpv (first x) resH resW (number->string (inexact->exact (first (second x)))) (number->string (inexact->exact (second (second x))))))
+           (start-mpv (first x)
+                      (number->string resH)
+                      (number->string resW)
+                      (number->string (inexact->exact (first (second x))))
+                      (number->string (inexact->exact (second (second x))))))
          zipped)))
 
 
@@ -88,10 +106,17 @@
      (list (find-x res-w x p) (find-y res-h x p r)))
    n)))
 
+(define (find-res-w scrn-size numcam)
+  (find-x scrn-size 2 (find-p numcam)))
+
+(define (find-res-h scrn-size numcam)
+  (find-y scrn-size (+ (find-p numcam) 1) (find-p numcam) (find-r numcam)))
+
 (define (no-primes n)
   (if (prime? n)
       (+ n 1)
       n))
+
 (define (find-p c)
   (let ((c-sqrt (floor (sqrt c))))
     (let g ((cur-n c-sqrt))
