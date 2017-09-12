@@ -1,7 +1,7 @@
 
 (use tcp posix numbers srfi-1)
-(define *height* 2160)
-(define *width* 3840)
+(define *height* 1080)
+(define *width* 1920)
 
 ;;;Work out topology
 (define (start-video x)
@@ -10,10 +10,9 @@
                           "/profile1")))
 
 (define (start-mpv ip x y gx gy)
-  (process (string-append "mpv --screen=0 --no-border --no-keepaspect --geometry=" x "x" y "-" gx "-" gy
+  (process (string-append "mpv --screen=1 --no-border --geometry=" x "x" y "-" gx "-" gy
                           " rtsp://admin:123456@" ip "/profile1")))
 
-(define *current-camera-count*)
 (define *current-host* "192.168.1.78")
 (define *current-port-no* 6508)
 
@@ -25,57 +24,24 @@
                          (cons (read-line i) (recur-ip))))
      (recur-ip))
 
-;(define *camera-list* (grab-camera-ips))
-(define *fake-camera-list* '("10.0.0.5" "10.0.0.5" "10.0.0.5"
-                             "10.0.0.5" "10.0.0.5" "10.0.0.5"))
-
-(define *medium-fake* '("10.0.0.5" "10.0.0.5" "10.0.0.5"
-                        "10.0.0.5" "10.0.0.5" "10.0.0.5"
-                        "10.0.0.5" "10.0.0.5" "10.0.0.5"
-                        "10.0.0.5" "10.0.0.5" "10.0.0.5"))
-
-(define *small-fake* '("10.0.0.5" "10.0.0.5" "10.0.0.5"
-                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
-                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
-                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
-                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
-                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
-                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
-                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
-                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
-                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
-                       "10.0.0.5" "10.0.0.5" "10.0.0.5"
-                       "10.0.0.5" "10.0.0.5" "10.0.0.5"))
-;;;
-(define (check-length lst)
-  (let ((len (length lst)))
-    (if (prime? len)
-        (+ len 1)
-        len)))
-
-(define (generate-fact-pair n)
-  (let ((fact (factors n 2)))
-    (if (= (length fact) 1)
-        (list (first fact) 1)
-        (list (list-ref fact (- (length fact) 2))
-              (list-ref fact (- (length fact) 3))))))
+ (define *camera-list* (grab-camera-ips))
 
 ;;;Test of a 3x2 grid [works]
 ;;;Need to solve the p and r problem so this
 ;;;can do this automatically
 (define (start-cameras cam-lst)
-  (let* ((len (length cam-lst))
-        (camera-grid (find-grid *height* *width* (iota len 1)))
+  (let* ((len (no-primes (length cam-lst)))
+        (camera-grid (find-grid *width* *height* (iota len 1)))
         (resW
-         (inexact->exact (find-res-h *height* len)))
+         (inexact->exact (find-res-h *width* len)))
         (resH
-         (inexact->exact (find-res-w *width* len)))
+         (inexact->exact (find-res-w *height* len)))
         (zipped (zip cam-lst camera-grid)))
 
     (map (lambda (x)
            (start-mpv (first x)
-                      (number->string resH)
                       (number->string resW)
+                      (number->string resH)
                       (number->string (inexact->exact (first (second x))))
                       (number->string (inexact->exact (second (second x))))))
          zipped)))
@@ -98,19 +64,20 @@
 
 ;;;ex (find-grid 1080 1920 #cameras #highestfactorwithinR #R)
 (define (find-grid res-h res-w n)
-  (let* ((len (no-primes (length n)))
+  (let* ((len (length n))
          (p (find-p len))
          (r (find-r len)))
   (map
    (lambda (x)
-     (list (find-x res-w x p) (find-y res-h x p r)))
+     (list (find-x res-h x p) (find-y res-w x p r)))
    n)))
 
-(define (find-res-w scrn-size numcam)
-  (find-x scrn-size 2 (find-p numcam)))
-
 (define (find-res-h scrn-size numcam)
-  (find-y scrn-size (+ (find-p numcam) 1) (find-p numcam) (find-r numcam)))
+  (* scrn-size (/ 1 (find-p numcam))))
+
+(define (find-res-w scrn-size numcam)
+  (* scrn-size (/ 1 (find-r numcam))))
+
 
 (define (no-primes n)
   (if (prime? n)
@@ -128,19 +95,6 @@
 (define (find-r c)
   (/ c (find-p c)))
 
-;;;To find a 2 * 3 column p > r
-;;;To find a 3 * 2 column r > p
-;;;To find a n+1 * n column p > r
-;;;To find a n * n+1 column r > p
-
-(define (factors n f)
-  (let loop ((f f) (acc '()))
-    (cond ((> f n) (reverse acc))
-          ((zero? (remainder n f))
-           (loop (add1 f) (cons f acc)))
-          (else (loop (add1 f) acc)))))
-
-
 ;;;Sicp lol
 (define (square x) (* x x))
 
@@ -157,3 +111,4 @@
 
 (define (prime? n)
   (= n (smallest-divisor n)))
+
