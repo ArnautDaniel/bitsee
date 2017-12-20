@@ -23,5 +23,3 @@ chicken-scheme 4.x using tcp-server egg
 The program should remain as light as possible.  FFMPEG will only copy the camera stream to reduce encoding overhead.  The server will need to handle organzing the video files and possibly concatenating all files for a particular camera after a 24 hour period (possibly in a different encoding)
 
 # Future Optimizations
-
-Current system should be O(n) and would increase networking overhead at that rate per raspberry added to the network.  A broadcasting method might be better with all camera streams going to the server which then pushes them onto a raspberry vlan.  I'm not sure if that'd turn it into O(1) but it's an idea.
