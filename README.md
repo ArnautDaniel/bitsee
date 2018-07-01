@@ -1,7 +1,6 @@
 # bitsee
 
-![bitsee](http://i.imgur.com/p38ijb7.jpg =300x300)
-
+<img src="http://i.imgur.com/p38ijb7.jpg" width="300" height="300">
 (bitsee the chihuahua is too busy sleeping to care about infringments on her name or image)
 
 # Simple CCTV for the raspberry pi using omxplayer
