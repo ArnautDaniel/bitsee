@@ -1,6 +1,6 @@
 # bitsee
 
-![bitsee](http://i.imgur.com/p38ijb7.jpg)
+![bitsee](http://i.imgur.com/p38ijb7.jpg =300x300)
 
 (bitsee the chihuahua is too busy sleeping to care about infringments on her name or image)
 
